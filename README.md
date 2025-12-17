@@ -1,5 +1,5 @@
 # Drone_Build
-Code and Hardware implementations for the drones built for the Laboratory of Autonomous Intelligent Robots - LAB-AIR, from the Federal University of Espírito Santo (UFES). This project is in active development, using a Teensy 4.0 microcontroller as the main board with Arduino IDE.
+Code and Hardware implementations for the drones built for the Laboratory of Autonomous Intelligent Robots - LAB-AIR, from the Federal University of Espírito Santo (UFES). This project is in active development, using a Teensy 4 microcontroller as the main board with Arduino IDE.
 
 ## VS-CODE development
 To use vscode as the IDE for development instead of the Arduino IDE, we recommend installing the following extensions:
