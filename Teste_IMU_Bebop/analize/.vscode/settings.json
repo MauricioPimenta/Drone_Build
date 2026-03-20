@@ -1,0 +1,4 @@
+{
+    "ROS2.distro": "noetic",
+    "python.analysis.autoImportCompletions": true
+}
