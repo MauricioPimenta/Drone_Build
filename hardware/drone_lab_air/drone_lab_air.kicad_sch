@@ -2,9 +2,303 @@
 	(version 20250114)
 	(generator "eeschema")
 	(generator_version "9.0")
-	(uuid ceb765fc-47c7-4cc0-8145-c04bbb330765)
+	(uuid "ceb765fc-47c7-4cc0-8145-c04bbb330765")
 	(paper "A4")
 	(lib_symbols)
+	(sheet
+		(at 86.36 82.55)
+		(size 23.114 26.416)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0ff9e7ce-6164-4831-bad6-6d70fd8ae3d7")
+		(property "Sheetname" "IHM"
+			(at 86.36 81.8384 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "ihm.kicad_sch"
+			(at 86.36 109.5506 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "drone_lab_air"
+				(path "/ceb765fc-47c7-4cc0-8145-c04bbb330765"
+					(page "7")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 204.724 93.726)
+		(size 17.78 24.384)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "10ac185d-9d17-4162-815f-b071f7d20901")
+		(property "Sheetname" "IMU MPU9250"
+			(at 204.724 93.0144 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "imu_mpu9250.kicad_sch"
+			(at 204.724 118.6946 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "drone_lab_air"
+				(path "/ceb765fc-47c7-4cc0-8145-c04bbb330765"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 129.54 138.176)
+		(size 21.844 24.892)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "18728cee-227b-44f1-8f4b-43815ca3c0c4")
+		(property "Sheetname" "Battery Manager"
+			(at 129.54 137.4644 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "bms.kicad_sch"
+			(at 129.54 163.6526 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "drone_lab_air"
+				(path "/ceb765fc-47c7-4cc0-8145-c04bbb330765"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 94.234 125.73)
+		(size 20.066 29.972)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "4329cafc-d4ff-4ea3-b149-1dc746eb02a4")
+		(property "Sheetname" "Power Supply"
+			(at 94.234 125.0184 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power_supply.kicad_sch"
+			(at 94.234 156.2866 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "drone_lab_air"
+				(path "/ceb765fc-47c7-4cc0-8145-c04bbb330765"
+					(page "8")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 130.81 89.662)
+		(size 19.304 25.654)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "56ac78c1-8542-4c16-adfd-3ec3935b947c")
+		(property "Sheetname" "MCU"
+			(at 130.81 88.9504 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu.kicad_sch"
+			(at 130.81 115.9006 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "drone_lab_air"
+				(path "/ceb765fc-47c7-4cc0-8145-c04bbb330765"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 170.434 104.902)
+		(size 17.78 18.796)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "86820d13-5e78-4998-87e3-5bbb2e41aa72")
+		(property "Sheetname" "IMU MPU6050"
+			(at 170.434 104.1904 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "imu_mpu6050.kicad_sch"
+			(at 170.434 124.2826 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "drone_lab_air"
+				(path "/ceb765fc-47c7-4cc0-8145-c04bbb330765"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 240.538 125.476)
+		(size 19.304 23.622)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "b50379b1-4967-434a-9d65-123763e4e628")
+		(property "Sheetname" "Motor Interface"
+			(at 240.538 124.7644 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "motor_interface.kicad_sch"
+			(at 240.538 149.6826 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "drone_lab_air"
+				(path "/ceb765fc-47c7-4cc0-8145-c04bbb330765"
+					(page "5")
+				)
+			)
+		)
+	)
 	(sheet_instances
 		(path "/"
 			(page "1")
