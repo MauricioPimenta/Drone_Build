@@ -132,7 +132,7 @@
 		)
 	)
 	(sheet
-		(at 94.234 125.73)
+		(at 78.232 128.016)
 		(size 20.066 29.972)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -148,7 +148,7 @@
 		)
 		(uuid "4329cafc-d4ff-4ea3-b149-1dc746eb02a4")
 		(property "Sheetname" "Power Supply"
-			(at 94.234 125.0184 0)
+			(at 78.232 127.3044 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -157,7 +157,7 @@
 			)
 		)
 		(property "Sheetfile" "power_supply.kicad_sch"
-			(at 94.234 156.2866 0)
+			(at 78.232 158.5726 0)
 			(effects
 				(font
 					(size 1.27 1.27)
