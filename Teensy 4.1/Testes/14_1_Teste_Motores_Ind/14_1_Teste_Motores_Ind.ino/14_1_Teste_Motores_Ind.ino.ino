@@ -20,17 +20,8 @@
 
 #include <Arduino.h>
 
-
-const int potPin = A0;      // A0 on Teensy 4.1 is physical pin 14
-const int Motor0 = 4;       // choose a digital pin for ESC control (any normal GPIO works)
-const int Motor1 = 5;
-const int Motor2 = 6;
-const int Motor3 = 7;
-
-const int LED_red = 0;
-const int LED_green = 1;
-const int LED_blue = 2;
-
+// const int potPin = A0;      // A0 on Teensy 4.1 is physical pin 14
+const int escPin = 6;       // choose a digital pin for ESC control (any normal GPIO works)
 
 constexpr uint32_t PERIOD_US = 20000;  // 50 Hz
 constexpr int PULSE_MIN_US = 1000;     // typical ESC min
@@ -54,57 +45,30 @@ constexpr int SAFETY_MAX_US = PULSE_MAX_US;
 elapsedMicros tick;
 int filteredPulseUs = PULSE_MIN_US;
 
-
-/*
- * Inverted pulse generator: keeps ESC line HIGH for high_us, then LOW for rest of period.
- */
+// Inverted pulse generator: keeps ESC line HIGH for high_us, then LOW for rest of period.
 static inline void sendEscPulseInverted(int high_us) {
   high_us = constrain(high_us, PULSE_MIN_US, SAFETY_MAX_US);
 
   // ESC line HIGH:
   // (inverted) -> Teensy LOW turns transistor OFF -> ESC pull-up makes line HIGH
-  digitalWrite(LED_green, LOW);
-  digitalWriteFast(Motor0, LOW);
-  digitalWriteFast(Motor1, LOW);
-  digitalWriteFast(Motor2, LOW);
-  digitalWriteFast(Motor3, LOW);
+  digitalWriteFast(escPin, LOW);
   delayMicroseconds(high_us);
 
-  
   // ESC line LOW for the remainder:
   // Teensy HIGH turns transistor ON -> pulls line LOW
-  digitalWriteFast(Motor0, HIGH);
-  digitalWriteFast(Motor1, HIGH);
-  digitalWriteFast(Motor2, HIGH);
-  digitalWriteFast(Motor3, HIGH);
+  digitalWriteFast(escPin, HIGH);
   delayMicroseconds((int)PERIOD_US - high_us);
-  digitalWrite(LED_green, HIGH);
 }
 
-
-/* ---- SETUP  ----*/
 void setup() {
   // Teensy 4.1 ADC is 12-bit capable
-  analogReadResolution(12);          // 0..4095
-  analogReadAveraging(8);            // extra smoothing in hardware (optional, but helpful)
+  // analogReadResolution(12);          // 0..4095
+  // analogReadAveraging(8);            // extra smoothing in hardware (optional, but helpful)
 
-  pinMode(Motor0, OUTPUT);
-  pinMode(Motor1, OUTPUT);
-  pinMode(Motor2, OUTPUT);
-  pinMode(Motor3, OUTPUT);
-
+  pinMode(escPin, OUTPUT);
+  Serial.begin(9600);
   // Idle state: keep ESC line HIGH (transistor OFF)
-  digitalWriteFast(Motor0, LOW);
-  digitalWriteFast(Motor1, LOW);
-  digitalWriteFast(Motor2, LOW);
-  digitalWriteFast(Motor3, LOW);
-
-  // LED
-  pinMode(LED_red, OUTPUT);
-  pinMode(LED_green, OUTPUT);
-  pinMode(LED_blue, OUTPUT);
-
-  digitalWrite(LED_red, HIGH);
+  digitalWriteFast(escPin, LOW);
 
   // Let things power up
   delay(500);
@@ -119,18 +83,14 @@ void setup() {
   filteredPulseUs = PULSE_MIN_US;
 }
 
-
-
-/* ---- LOOP ---- */
 void loop() {
-  digitalWrite(LED_red, LOW);
-  digitalWrite(LED_blue, HIGH);
   // 1) Read potentiometer
-  int raw = analogRead(potPin);  // 0..4095
-  raw = constrain(raw, 0, 4095);
+  // int raw = analogRead(potPin);  // 0..4095
+  // raw = constrain(raw, 0, 4095);
 
   // 2) Map to pulse width
-  int targetPulseUs = map(raw, 0, 4095, PULSE_MIN_US, PULSE_MAX_US);
+  // int targetPulseUs = map(raw, 0, 4095, PULSE_MIN_US, PULSE_MAX_US);
+  int targetPulseUs = 1098;
 
   // 3) Deadband near min (helps prevent unintended spin from noise)
   if (targetPulseUs < (PULSE_MIN_US + DEAD_BAND_US)) {
@@ -139,10 +99,9 @@ void loop() {
 
   // 4) IIR filter: filtered += (target - filtered)/2^SHIFT
   filteredPulseUs += (targetPulseUs - filteredPulseUs) >> FILTER_SHIFT;
-
+  Serial.println(filteredPulseUs);
   // 5) Output one ESC frame (20ms total)
   sendEscPulseInverted(filteredPulseUs);
 
   // loop repeats at ~50Hz because sendEscPulseInverted already delays ~20ms
-  
 }

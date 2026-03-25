@@ -35,6 +35,7 @@ const int motor_traseiro_esquerdo = 4;
 const int motor_dianteiro_direito = 5;
 const int motor_dianteiro_esquerdo = 6;
 
+const int LED_internal = 13;
 // const int LED_red = 0;
 // const int LED_green = 1;
 // const int LED_blue = 2;
@@ -53,14 +54,28 @@ constexpr uint32_t ARM_TIME_MS = 3000;
 constexpr int FILTER_SHIFT = 4;
 
 // Optional deadband near minimum to prevent tiny noise from spinning motor
-constexpr int DEAD_BAND_US = 20;
+constexpr int DEAD_BAND_US = 30;
 
 // If you want to limit max throttle (safety), reduce this (e.g. 1700)
 constexpr int SAFETY_MAX_US = PULSE_MAX_US;
 
 // ----- Internal state -----
-elapsedMillis tick;
+elapsedMillis tick;   // Integer that increments 1000 times in one second
 int filteredPulseUs = PULSE_MIN_US;
+long unsigned int high_us;
+
+// velocidade
+int raw = 0;
+bool inc = true;
+
+// Timers
+elapsedMillis Timer_LED = 0;    // LED
+
+// Timers para comando dos Motores
+elapsedMicros Timer_Mdd = 0;    // Timer Motor Dianteiro Direito
+elapsedMicros Timer_Mde = 0;    // Timer Motor Dianteiro Esquerdo
+elapsedMicros Timer_Mtd = 0;    // Timer Motor Traseiro Direito
+elapsedMicros Timer_Mte = 0;    // Timer Motor Traseiro Esquerdo
 
 
 /*
@@ -71,19 +86,19 @@ static inline void sendEscPulseInverted(int high_us) {
 
   // ESC line HIGH:
   // (inverted) -> Teensy LOW turns transistor OFF -> ESC pull-up makes line HIGH
-  digitalWriteFast(motor_dianteiro_direito, LOW);
+  // digitalWriteFast(motor_dianteiro_direito, LOW);
   digitalWriteFast(motor_dianteiro_esquerdo, LOW);
-  digitalWriteFast(motor_traseiro_direito, LOW);
-  digitalWriteFast(motor_traseiro_esquerdo, LOW);
+  // digitalWriteFast(motor_traseiro_direito, LOW);
+  // digitalWriteFast(motor_traseiro_esquerdo, LOW);
   delayMicroseconds(high_us);
 
   
   // ESC line LOW for the remainder:
   // Teensy HIGH turns transistor ON -> pulls line LOW
-  digitalWriteFast(motor_dianteiro_direito, HIGH);
+  // digitalWriteFast(motor_dianteiro_direito, HIGH);
   digitalWriteFast(motor_dianteiro_esquerdo, HIGH);
-  digitalWriteFast(motor_traseiro_direito, HIGH);
-  digitalWriteFast(motor_traseiro_esquerdo, HIGH);
+  // digitalWriteFast(motor_traseiro_direito, HIGH);
+  // digitalWriteFast(motor_traseiro_esquerdo, HIGH);
   delayMicroseconds((int)PERIOD_US - high_us);
 }
 
@@ -93,7 +108,10 @@ void setup() {
   // Teensy 4.1 ADC is 12-bit capable
   analogReadResolution(12);          // 0..4095
   analogReadAveraging(8);            // extra smoothing in hardware (optional, but helpful)
-  Serial.begin(96000);
+
+  // serial to check signal output
+  // Serial.begin(9600);
+
 
   pinMode(motor_traseiro_direito, OUTPUT);
   pinMode(motor_traseiro_esquerdo, OUTPUT);
@@ -107,6 +125,7 @@ void setup() {
   digitalWriteFast(motor_traseiro_esquerdo, LOW);
 
   // LED
+  pinMode(LED_internal, OUTPUT);
   // pinMode(LED_red, OUTPUT);
   // pinMode(LED_green, OUTPUT);
   // pinMode(LED_blue, OUTPUT);
@@ -114,56 +133,60 @@ void setup() {
   // digitalWrite(LED_red, HIGH);
 
   // Let things power up
-  delay(5000);
+  delay(500);
 
   // Arm ESC at minimum throttle for a while
   uint32_t t0 = millis();
-  uint i = 0;
   while (millis() - t0 < ARM_TIME_MS) {
-    Serial.println(i);
     sendEscPulseInverted(PULSE_MIN_US);
-    i++;
   }
 
   // Initialize filter at min
   filteredPulseUs = PULSE_MIN_US;
+
+  tick = 0;
 }
 
-int raw = 0;
-bool inc = true;
+
 
 
 /* ---- LOOP ---- */
-void loop() {
-  
-  // // Check time passed to increment motor velocity
-  // if (tick > 500)
-  // {
-  //   if (inc) // increasing speed
-  //   {
-  //     raw++;
+void loop()
+{
+  // Check time passed to increment motor velocity
+  if (tick > 1000)
+  {
+    if (inc) // increasing speed
+    {
+      raw++;
+      // if (raw > 2000)
+      //   raw +=2;
+      if (raw > 4095)
+        inc = false;
+    }
+    else // decreasing speed
+    {
+      raw--;
+      // if (raw > 2000)
+      //   raw -= 2;
+      if (raw < 0)
+        inc = true;
+    }
 
-  //     if (raw > 4095)
-  //       inc = false;
+    // save the new velocity and reset the timer
+    raw = constrain(raw, 0, 4095);
+    tick = 0;
+  }
 
-  //   }
-  //   else // decreasing speed
-  //   {
-  //     raw--;
-  //     if (raw < 0)
-  //       inc = true;
-  //   }
-
-  //   raw = constrain(raw, 0, 4095);
-  //   // tick = 0;
-  // }
-
-  
+  // Timer to blink led
+  if (Timer_LED > 1000)
+  {
+    digitalToggle(LED_internal);
+    Timer_LED = 0;
+  }
 
   // 2) Map to pulse width
   int targetPulseUs = map(raw, 0, 4095, PULSE_MIN_US, PULSE_MAX_US);
-  // Serial.println(targetPulseUs);
-  targetPulseUs = 1000;
 
   // 3) Deadband near min (helps prevent unintended spin from noise)
   if (targetPulseUs < (PULSE_MIN_US + DEAD_BAND_US)) {
@@ -172,10 +195,43 @@ void loop() {
 
   // 4) IIR filter: filtered += (target - filtered)/2^SHIFT
   filteredPulseUs += (targetPulseUs - filteredPulseUs) >> FILTER_SHIFT;
-  // filteredPulseUs = Serial.read()
-  Serial.println(filteredPulseUs);
-  // 5) Output one ESC frame (20ms total)
-  sendEscPulseInverted(filteredPulseUs);
+
+  high_us = constrain(high_us, PULSE_MIN_US, SAFETY_MAX_US);
+
+  // Timer Motores
+  if (Timer_Mde > PERIOD_US)
+  {
+    digitalWriteFast(motor_dianteiro_esquerdo, LOW);
+    Timer_Mde = 0;
+  }
+  if (Timer_Mde < high_us)
+  {
+    digitalWrite(motor_dianteiro_esquerdo, LOW);
+  }
+
+  if (Timer_Mde > high_us)
+  {
+    digitalWrite(motor_dianteiro_esquerdo, HIGH);
+  }
+
+
+  // ESC line HIGH:
+  // (inverted) -> Teensy LOW turns transistor OFF -> ESC pull-up makes line HIGH
+  // digitalWriteFast(motor_dianteiro_direito, LOW);
+  // digitalWriteFast(motor_dianteiro_esquerdo, LOW);
+  // digitalWriteFast(motor_traseiro_direito, LOW);
+  // digitalWriteFast(motor_traseiro_esquerdo, LOW);
+  // delayMicroseconds(high_us);
+
+  
+  // ESC line LOW for the remainder:
+  // Teensy HIGH turns transistor ON -> pulls line LOW
+  // digitalWriteFast(motor_dianteiro_direito, HIGH);
+  // digitalWriteFast(motor_dianteiro_esquerdo, HIGH);
+  // digitalWriteFast(motor_traseiro_direito, HIGH);
+  // digitalWriteFast(motor_traseiro_esquerdo, HIGH);
+  // delayMicroseconds((int)PERIOD_US - high_us);
+  
 
   // loop repeats at ~50Hz because sendEscPulseInverted already delays ~20ms
   
