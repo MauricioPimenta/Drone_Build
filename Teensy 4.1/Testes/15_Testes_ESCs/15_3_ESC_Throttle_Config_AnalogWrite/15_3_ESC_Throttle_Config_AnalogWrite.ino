@@ -266,7 +266,7 @@ void loop() {
  * Inverted pulse generator: keeps ESC line HIGH for high_us, then LOW for rest of period.
  */
 void sendEscPulseInverted(int high_us, int motor) {
-  high_us = constrain(high_us, PULSE_MIN_US, SAFETY_MAX_US);
+  // high_us = constrain(high_us, PULSE_MIN_US, SAFETY_MAX_US);
 
   // ESC line HIGH:
   // (inverted) -> Teensy LOW turns transistor OFF -> ESC pull-up makes line HIGH
