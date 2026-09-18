@@ -166,8 +166,7 @@ void loop() {
   // Ler serial sem travar o programa
   lerSerialNaoBloqueante();
 
-  if (motor_ativo == 0)
-  {
+  if (motor_ativo == 0){
     targetPulseUs = pulse_Mde;
   }
   if (motor_ativo == 1){
