@@ -3,12 +3,12 @@
 #include <SD.h>
 #include <SPI.h>
 
-// --- Definições de Pinos ---
+// --- Definicoes de Pinos ---
 const int HX711_DOUT = 4;
 const int HX711_SCK = 5;
 const int ESC_PIN = 3; 
 
-// --- Configurações do Ensaio ---
+// --- Configuracoes do Ensaio ---
 const int PWM_MIN = 1000;
 const int PWM_MAX = 2000;
 const int PWM_STEP = 50;
@@ -16,12 +16,12 @@ const unsigned long SETTLING_TIME_MS = 1500;
 const int SAMPLES_TO_AVERAGE = 10;           
 const float CALIBRATION_FACTOR = 113.0f;    
 
-// --- Configurações de PWM Nativo da Teensy ---
+// --- Configuracoes de PWM Nativo da Teensy ---
 const uint32_t PWM_FREQUENCY = 50; // Hz
 const float PERIOD_US = 1000000.0 / PWM_FREQUENCY; // 20000 us (20 ms)
-const int PWM_RESOLUTION_BITS = 12;  // Resolução configurável (ex: 8, 10, 12, 14, 16...)
+const int PWM_RESOLUTION_BITS = 12;  // Resolucao configuravel (ex: 8, 10, 12, 14, 16...)
 
-// Calcula automaticamente 2^Bits em tempo de compilação (ex: 1 << 12 = 4096)
+// Calcula automaticamente 2^Bits em tempo de compilacao (ex: 1 << 12 = 4096)
 const float MAX_DUTY_VAL = (float)(1 << PWM_RESOLUTION_BITS);
 
 // IMPORTANTE: Altere para 'false' se um dia ligar o sinal da Teensy direto no ESC (sem transistor)
@@ -31,7 +31,7 @@ HX711 scale;
 File dataFile;
 char logFileName[64]; 
 
-// --- Máquina de Estados do Ensaio ---
+// --- Maquina de Estados do Ensaio ---
 enum TestState {
   WAITING_SETTLEMENT,
   ACQUIRING_DATA,    
@@ -46,7 +46,7 @@ float thrustSum = 0.0;
 
 
 // ====================================================================
-// FUNÇÃO PARA CONTROLE DO ESC VIA HARDWARE PWM
+// FUNCAO PARA CONTROLE DO ESC VIA HARDWARE PWM
 // ====================================================================
 void setEscPulse(int pulseUs) {
   uint32_t duty;
