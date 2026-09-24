@@ -6,7 +6,7 @@
 // --- Definições de Pinos ---
 const int HX711_DOUT = 4;
 const int HX711_SCK = 5;
-const int VOLTAGE_PIN = A0;  // Pino analógico 14 da Teensy para ler a tensão
+const int VOLTAGE_PIN = A10;  // Pino analógico 24 da Teensy para ler a tensão
 
 // --- Configurações do Ensaio ---
 const int SAMPLES_TO_AVERAGE = 10;        // Quantidade de amostras para cada média salva
