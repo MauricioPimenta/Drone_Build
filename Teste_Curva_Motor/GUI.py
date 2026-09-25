@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.9
+
 import sys
 import time
 from collections import deque
@@ -18,6 +20,7 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
+    QSlider,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -204,7 +207,6 @@ class ThrustTestBenchGUI(QMainWindow):
                 width: 20px;
                 border-left-width: 1px;
                 border-left-color: #455A64;
-                border-left-style: solid;
                 border-top-right-radius: 2px;
                 border-bottom-right-radius: 2px;
                 background-color: #263238;
@@ -236,16 +238,66 @@ class ThrustTestBenchGUI(QMainWindow):
                 background-color: #263238;
                 border-left: 1px solid #455A64;
                 width: 16px;
+                subcontrol-origin: border;
+            }
+            QSpinBox::up-button {
+                subcontrol-position: top right;
+                border-top-right-radius: 3px;
+            }
+            QSpinBox::down-button {
+                subcontrol-position: bottom right;
+                border-bottom-right-radius: 3px;
+                border-top: 1px solid #455A64;
+            }
+            QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+                background-color: #37474F;
             }
             QSpinBox::up-arrow {
-                border-left: 3px solid none;
-                border-right: 3px solid none;
-                border-bottom: 4px solid #FFFFFF;
+                image: none;
+                border-left: 4px solid none;
+                border-right: 4px solid none;
+                border-bottom: 5px solid #FFFFFF;
+                width: 0px; height: 0px;
+                margin-bottom: 2px;
             }
             QSpinBox::down-arrow {
-                border-left: 3px solid none;
-                border-right: 3px solid none;
-                border-top: 4px solid #FFFFFF;
+                image: none;
+                border-left: 4px solid none;
+                border-right: 4px solid none;
+                border-top: 5px solid #FFFFFF;
+                width: 0px; height: 0px;
+                margin-top: 2px;
+            }
+            /* Remove os botões feios nativos do tema do SO */
+            QSpinBox {
+                padding-right: 20px; 
+            }
+   
+            /* --- Estilos dos QSlider --- */
+            QSlider::groove:horizontal {
+                border: 1px solid #37474F;
+                height: 6px;
+                background: #1E1E1E;
+                margin: 2px 0;
+                border-radius: 3px;
+            }
+            QSlider::sub-page:horizontal {
+                background: #007C91;
+                border: 1px solid #37474F;
+                height: 6px;
+                border-radius: 3px;
+            }
+            QSlider::handle:horizontal {
+                background: #00E5FF;
+                border: 1px solid #00B8D4;
+                width: 14px;
+                height: 14px;
+                margin: -5px 0;
+                border-radius: 7px;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #FFFFFF;
+                border: 1px solid #00E5FF;
             }
 
             /* --- Botões Gerais --- */
@@ -260,6 +312,19 @@ class ThrustTestBenchGUI(QMainWindow):
             }
             QPushButton:hover { background-color: #37474F; }
             QPushButton:pressed { background-color: #455A64; }
+            
+            /* Estilos específicos para os botões de ação */
+            QPushButton#btnStart { background-color: #2E7D32; border: 1px solid #1B5E20; }
+            QPushButton#btnStart:hover { background-color: #388E3C; }
+            QPushButton#btnStart:pressed { background-color: #1B5E20; }
+            
+            QPushButton#btnTare { background-color: #F57C00; border: 1px solid #E65100; }
+            QPushButton#btnTare:hover { background-color: #FB8C00; }
+            QPushButton#btnTare:pressed { background-color: #E65100; }
+            
+            QPushButton#btnReset { background-color: #D32F2F; border: 1px solid #B71C1C; }
+            QPushButton#btnReset:hover { background-color: #E53935; }
+            QPushButton#btnReset:pressed { background-color: #B71C1C; }
             
             /* --- Área de Texto --- */
             QPlainTextEdit {
@@ -324,28 +389,71 @@ class ThrustTestBenchGUI(QMainWindow):
         box_configs = QGroupBox("CONFIGS:")
         grid_cfg = QGridLayout(box_configs)
 
+        # 1. MIN PULSE (Slider + SpinBox)
         grid_cfg.addWidget(QLabel("MIN PULSE (µs):"), 0, 0)
+        layout_min = QHBoxLayout()
+        self.slider_min = QSlider(Qt.Horizontal)
+        self.slider_min.setRange(800, 3000)
+        self.slider_min.setValue(1000)
         self.spin_min = QSpinBox()
-        self.spin_min.setRange(800, 2200)
+        self.spin_min.setRange(800, 3000)
         self.spin_min.setValue(1000)
-        grid_cfg.addWidget(self.spin_min, 0, 1)
+        self.spin_min.setFixedWidth(90)
+        self.slider_min.valueChanged.connect(self.spin_min.setValue)
+        self.spin_min.valueChanged.connect(self.slider_min.setValue)
+        layout_min.addWidget(self.slider_min)
+        layout_min.addWidget(self.spin_min)
+        grid_cfg.addLayout(layout_min, 0, 1)
 
+        # 2. MAX PULSE (Slider + SpinBox)
         grid_cfg.addWidget(QLabel("MAX PULSE (µs):"), 1, 0)
+        layout_max = QHBoxLayout()
+        self.slider_max = QSlider(Qt.Horizontal)
+        self.slider_max.setRange(800, 3000)
+        self.slider_max.setValue(2000)
         self.spin_max = QSpinBox()
-        self.spin_max.setRange(800, 2500)
+        self.spin_max.setRange(800, 3000)
         self.spin_max.setValue(2000)
-        grid_cfg.addWidget(self.spin_max, 1, 1)
+        self.spin_max.setFixedWidth(90)
+        self.slider_max.valueChanged.connect(self.spin_max.setValue)
+        self.spin_max.valueChanged.connect(self.slider_max.setValue)
+        layout_max.addWidget(self.slider_max)
+        layout_max.addWidget(self.spin_max)
+        grid_cfg.addLayout(layout_max, 1, 1)
 
+        # 3. STEP (Slider + SpinBox)
         grid_cfg.addWidget(QLabel("STEP (µs):"), 2, 0)
+        layout_step = QHBoxLayout()
+        self.slider_step = QSlider(Qt.Horizontal)
+        self.slider_step.setRange(5, 500)
+        self.slider_step.setValue(50)
         self.spin_step = QSpinBox()
         self.spin_step.setRange(5, 500)
         self.spin_step.setValue(50)
-        grid_cfg.addWidget(self.spin_step, 2, 1)
+        self.spin_step.setFixedWidth(90)
+        self.slider_step.valueChanged.connect(self.spin_step.setValue)
+        self.spin_step.valueChanged.connect(self.slider_step.setValue)
+        layout_step.addWidget(self.slider_step)
+        layout_step.addWidget(self.spin_step)
+        grid_cfg.addLayout(layout_step, 2, 1)
 
         self.btn_start_test = QPushButton("Iniciar Teste / Enviar Config")
+        self.btn_start_test.setObjectName("btnStart")
         self.btn_start_test.setStyleSheet("background-color: #2E7D32; color: white;")
         self.btn_start_test.clicked.connect(self._send_test_start)
         grid_cfg.addWidget(self.btn_start_test, 3, 0, 1, 2)
+        
+        # Novo Botão Tara (Laranja)
+        self.btn_tare = QPushButton("Zerar Balança (TARE)")
+        self.btn_tare.setObjectName("btnTare")
+        self.btn_tare.clicked.connect(self._send_tare)
+        grid_cfg.addWidget(self.btn_tare, 4, 0, 1, 2)
+
+        # Novo Botão Reset (Vermelho)
+        self.btn_reset = QPushButton("Parar Teste / Reset (IDLE)")
+        self.btn_reset.setObjectName("btnReset")
+        self.btn_reset.clicked.connect(self._send_reset)
+        grid_cfg.addWidget(self.btn_reset, 5, 0, 1, 2)
 
         mid_layout.addWidget(box_configs, stretch=1)
 
@@ -370,7 +478,7 @@ class ThrustTestBenchGUI(QMainWindow):
         # State Machine Badge
         state_layout = QHBoxLayout()
         state_layout.addWidget(QLabel("State-Machine:"))
-        self.lbl_state = QLabel("IDLE / PARADO")
+        self.lbl_state = QLabel("DESCONECTADO")
         self.lbl_state.setStyleSheet("""
             background-color: #263238; 
             color: #FFD54F; 
@@ -510,11 +618,28 @@ class ThrustTestBenchGUI(QMainWindow):
         
         # Envia comando no formato: START,min,max,step
         cmd = f"START,{p_min},{p_max},{step}"
+        
         if self.serial_thread:
             self.serial_thread.send_command(cmd)
             self.txt_messages.appendPlainText(f">> {cmd}")
         else:
             self.txt_messages.appendPlainText("Aviso: Conecte a porta serial antes de iniciar!")
+
+
+    def _send_tare(self):
+        if self.serial_thread:
+            self.serial_thread.send_command("TARE")
+            self.txt_messages.appendPlainText(">> Comando TARE enviado. Aguarde...")
+        else:
+            self.txt_messages.appendPlainText("Aviso: Conecte a porta serial primeiro!")
+
+    def _send_reset(self):
+        if self.serial_thread:
+            self.serial_thread.send_command("RESET")
+            self.txt_messages.appendPlainText(">> Comando RESET enviado.")
+        else:
+            self.txt_messages.appendPlainText("Aviso: Conecte a porta serial primeiro!")
+
 
     @pyqtSlot(bool, str)
     def _on_connection_status(self, connected: bool, msg: str):
@@ -539,7 +664,7 @@ class ThrustTestBenchGUI(QMainWindow):
         # Atualiza Estado e Leds
         self.lbl_state.setText(state.upper())
         
-        if "completed" in state.lower() or "idle" in state.lower():
+        if "idle" in state.lower() or "completed" in state.lower() or "desconectado" in state.lower():
             self.led_running.set_state(False)
             self.led_stopped.set_state(True)
         else:

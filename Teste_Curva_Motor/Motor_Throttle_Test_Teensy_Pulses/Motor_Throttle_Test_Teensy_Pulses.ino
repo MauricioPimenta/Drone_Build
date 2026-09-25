@@ -45,7 +45,7 @@ unsigned long stepStartTime = 0;
 int samplesCollected = 0;
 float thrustSum = 0.0;
 float currentThrustInstant = 0.0;
-bool startTest = false;
+// bool startTest = false;
 
 // Controle de taxa de transmissao para a GUI (20 Hz = 50 ms)
 unsigned long lastTelemetryTime = 0;
@@ -113,19 +113,28 @@ void iniciarEnsaio() {
   stepStartTime = millis();
   samplesCollected = 0;
   thrustSum = 0.0;
+
   currentState = WAITING_SETTLEMENT;
-  startTest = true;
+  // startTest = true;
 }
 
 // ====================================================================
 // PARADA / CORTE DE SEGURANCA
 // ====================================================================
-void pararEnsaio() {
+void FinishTest(bool sucesso = false) {
   currentPwm = pwmMin;
   setEscPulse(pwmMin);
-  currentState = TEST_COMPLETED;
-  startTest = false;
-  Serial.println("# Ensaio finalizado ou cancelado. Motor em pulso minimo.");
+
+  // startTest = false;
+  if (sucesso) {
+    currentState = TEST_COMPLETED;
+    Serial.println("# Ensaio concluido com sucesso.");
+  }
+  else {
+    currentState = STATE_IDLE;
+    Serial.println("# Ensaio interrompido/cancelado pelo usuario.");
+  }
+  Serial.println("# Motor em pulso minimo");
 }
 
 // ====================================================================
@@ -152,10 +161,23 @@ void checkSerialCommands() {
       }
       
       iniciarEnsaio();
-    } 
-    else if (cmd.equalsIgnoreCase("STOP")) {
-      pararEnsaio();
     }
+    else if (cmd.equalsIgnoreCase("RESET")){
+      // Permite voltar manualmente a IDLE apos um TEST_COMPLETED
+      FinishTest(false);
+      Serial.println("# Sistema resetado para estado IDLE.");
+    }
+    else if (cmd.equalsIgnoreCase("TARE")) {
+      // Comando util exclusivo de repouso
+      if (currentState == STATE_IDLE) {
+        Serial.println("# Tarando a balanca... Remova qualquer peso do motor.");
+        scale.tare(20);
+        Serial.println("# Balanca zerada com sucesso.");
+      } else {
+        Serial.println("# AVISO: Nao e possivel tarar com teste em andamento!");
+      }
+    }
+
   }
 }
 
@@ -185,6 +207,8 @@ void setup() {
   scale.begin(HX711_DOUT, HX711_SCK);
   scale.set_scale(CALIBRATION_FACTOR);
 
+  // Inicia explicitamente em IDLE
+  currentState = STATE_IDLE;
   Serial.println("# Sistema em espera. Envie START pela interface para iniciar.");
 }
 
@@ -203,60 +227,62 @@ void loop() {
   }
 
   // Maquina de Estados do Ensaio
-  if (startTest) {
-    switch (currentState) {
-      
-      case WAITING_SETTLEMENT:
-        if (currentMillis - stepStartTime >= SETTLING_TIME_MS) {
-          currentState = ACQUIRING_DATA;
-          samplesCollected = 0;
-          thrustSum = 0.0;
-        }
-        break;
+  switch (currentState) {
 
-      case ACQUIRING_DATA:
-        if (scale.is_ready()) {
-          thrustSum += currentThrustInstant; 
-          samplesCollected++;
+    // --- COMPORTAMENTOS EXCLUSIVOS DO IDLE (PRE-TESTE) ---
+    case STATE_IDLE:
+      // 1. Forca pulso minimo no motor continuamente por seguranca
+      setEscPulse(pwmMin);
+      currentPwm = pwmMin;
+      // 2. A balança continua lendo acima para permitir checagem estática na GUI
+      break;
+    
+    case WAITING_SETTLEMENT:
+      if (currentMillis - stepStartTime >= SETTLING_TIME_MS) {
+        currentState = ACQUIRING_DATA;
+        samplesCollected = 0;
+        thrustSum = 0.0;
+      }
+      break;
 
-          if (samplesCollected >= SAMPLES_TO_AVERAGE) {
-            float avgThrust = thrustSum / SAMPLES_TO_AVERAGE;
-            
-            // Grava no cartao SD apenas se a flag estiver ativa
-            if (sdCardPresent) {
-              dataFile = SD.open(logFileName, FILE_WRITE);
-              if (dataFile) {
-                dataFile.print(currentPwm);
-                dataFile.print(",");
-                dataFile.println(avgThrust, 3); 
-                dataFile.close();
-              }
-            }
+    case ACQUIRING_DATA:
+      if (scale.is_ready()) {
+        thrustSum += currentThrustInstant; 
+        samplesCollected++;
 
-            // Avanca para o proximo degrau
-            currentPwm += pwmStep;
-            
-            if (currentPwm > pwmMax) {
-              pararEnsaio();
-              Serial.println("# Ensaio concluido com sucesso!");
-            } else {
-              setEscPulse(currentPwm);
-              stepStartTime = currentMillis;     
-              currentState = WAITING_SETTLEMENT; 
+        if (samplesCollected >= SAMPLES_TO_AVERAGE) {
+          float avgThrust = thrustSum / SAMPLES_TO_AVERAGE;
+          
+          // Grava no cartao SD apenas se a flag estiver ativa
+          if (sdCardPresent) {
+            dataFile = SD.open(logFileName, FILE_WRITE);
+            if (dataFile) {
+              dataFile.print(currentPwm);
+              dataFile.print(",");
+              dataFile.println(avgThrust, 4); 
+              dataFile.close();
             }
           }
+
+          // Avanca para o proximo degrau
+          currentPwm += pwmStep;
+          
+          if (currentPwm > pwmMax) {
+            FinishTest(true);
+          } else {
+            setEscPulse(currentPwm);
+            stepStartTime = millis();     
+            currentState = WAITING_SETTLEMENT; 
+          }
         }
-        break;
+      }
+      break;
 
-      case TEST_COMPLETED:
-        setEscPulse(pwmMin);
-        startTest = false;
-        break;
+    case TEST_COMPLETED:
+      setEscPulse(pwmMin);
+      break;
 
-      case STATE_IDLE:
-      default:
-        break;
-    }
+    
   }
 
   // -------------------------------------------------------------
